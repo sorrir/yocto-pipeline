@@ -1,0 +1,57 @@
+global:
+  enterprise: false
+  multitenancy: false
+  mongodb:
+    URL: mongodb://REDACTED@mongodb
+  s3:
+    AWS_URI: REDACTED
+    AWS_BUCKET: mender-artifacts
+    AWS_ACCESS_KEY_ID: minio
+    AWS_SECRET_ACCESS_KEY: REDACTED
+
+api_gateway:
+  certs:
+    dhparam: |-
+      REDACTED
+    cert: |-
+      -----BEGIN CERTIFICATE-----
+      REDACTED
+      -----END CERTIFICATE-----
+    key: |-
+      -----BEGIN PRIVATE KEY-----
+      REDACTED
+      -----END PRIVATE KEY-----
+
+
+deployments:
+  image:
+    registry: docker.io
+    repository: mendersoftware/deployments
+
+device_auth:
+  certs:
+    key: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      REDACTED
+      -----END RSA PRIVATE KEY-----
+
+
+inventory:
+  image:
+    registry: docker.io
+    repository: mendersoftware/inventory
+
+useradm:
+  image:
+    registry: docker.io
+    repository: mendersoftware/useradm
+  certs:
+    key: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      REDACTED
+      -----END RSA PRIVATE KEY-----
+
+workflows:
+  image:
+    registry: docker.io
+    repository: mendersoftware/workflows

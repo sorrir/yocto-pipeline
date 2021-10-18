@@ -1,0 +1,39 @@
+build-pi3:
+  image: ghcr.io/sorrir/yocto:latest
+  stage: build    
+  script:
+    - mkdir working && cd working
+    - repo init -u https://github.com/mendersoftware/meta-mender-community -m meta-mender-raspberrypi/scripts/manifest-raspberrypi.xml -b ${BRANCH}
+    - repo sync
+    - git clone https://github.com/sorrir/meta-omi.git sources/meta-omi
+    - git clone https://github.com/sorrir/meta-k3s.git sources/meta-k3s
+    - source setup-environment raspberrypi
+    - bitbake-layers show-layers
+    - bitbake-layers remove-layer meta-mender-demo
+    - cp ${CI_PROJECT_DIR}/local.conf conf/local.conf
+    - echo "MENDER_ARTIFACT_NAME = \"$ARTIFACT_NAME\"" >> conf/local.conf
+    - bitbake-layers add-layer ../sources/meta-omi
+    - bitbake-layers add-layer ../sources/meta-k3s
+    - bitbake-layers show-layers
+    - bitbake core-image-base
+  artifacts:
+    paths:
+      - working/build/tmp/deploy/images/raspberrypi3/*.sdimg
+      - working/build/tmp/deploy/images/raspberrypi3/*.mender
+      - working/build/conf/local.conf
+  variables:
+    BRANCH: warrior
+    ARTIFACT_NAME: dev-pi3-${CI_JOB_ID}-${CI_COMMIT_REF_SLUG}
+
+deploy:
+  image: alpine:3.11
+  stage: deploy
+  variables:
+    MENDER_SERVER_URI: REDACTED
+    MENDER_SERVER_USER: REDACTED
+    MENDER_SERVER_PASS: REDACTED
+  script:
+    - wget https://d1b0l86ne08fsf.cloudfront.net/mender-cli/1.3.0/linux/mender-cli
+    - chmod +x mender-cli
+    - ./mender-cli login -k --server $MENDER_SERVER_URI --username $MENDER_SERVER_USER --password $MENDER_SERVER_PASS
+    - ./mender-cli artifacts upload -k --server $MENDER_SERVER_URI working/build/tmp/deploy/images/raspberrypi3/core-image-base-raspberrypi3-*.mender

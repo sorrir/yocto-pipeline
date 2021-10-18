@@ -1,0 +1,19 @@
+kind: Ingress
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: mender
+  annotations:
+    haproxy.org/forwarded-for: "true"
+    haproxy.org/ssl-passthrough: "true"
+spec:
+  rules:
+    - host: "REDACTED"
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mender-api-gateway
+                port:
+                  number: 443

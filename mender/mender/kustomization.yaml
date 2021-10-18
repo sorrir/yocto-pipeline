@@ -1,0 +1,45 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: mender
+
+bases:
+- ../minio
+- ../mongodb
+
+commonLabels:
+  app: mender
+
+secretGenerator:
+  - name: mongodb-secret
+    literals:
+      - MONGO_INITDB_ROOT_PASSWORD=REDACTED
+    behavior: replace
+  - name: minio-secret
+    literals:
+      - MINIO_SECRET_KEY=REDACTED
+    behavior: replace
+
+images:
+  - name: mongo:4.4-bionic
+    newName: mongo
+    newTag: 4.4-bionic
+  - name: minio/minio:RELEASE.2020-11-19T23-48-16Z
+    newName: minio/minio
+    newTag: RELEASE.2020-11-19T23-48-16Z
+
+resources:
+  - ingress.yaml
+
+patchesStrategicMerge:
+  - minio_service.yaml
+
+
+helmCharts:
+- name: mender
+  includeCRDs: true
+  namespace: mender
+  valuesFile: values.yaml
+  releaseName: mender
+  version: 2.5.0
+  repo: https://charts.mender.io
